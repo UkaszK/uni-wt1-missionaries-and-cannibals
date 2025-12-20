@@ -1,19 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-cyan-200 py-5">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.5/svg.min.js"
+        integrity="sha512-CkUwcqrYQeVgMsjmgk8LfpTvqJRd10i2WBo1/60jZ8RN2aH/f6KFV4lKRYWnQjeWn3o8Fjp5ixVNeP16G5VAgw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="main.js" type="module"></script>
     <script src="src/utils.js" type="module"></script>
 
-    <title>Cannibals and Missionaries Visualizer</title>
+    <title>Missionaries and Cannibals</title>
 </head>
 
-<body>
+<body class="flex flex-col gap-5 mx-auto w-1/2">
+    <!-- Header -->
+    <p class="text-2xl font-semibold text-black">Missionaries and Cannibals Visualizer</p>
 
+    <!-- Configuration -->
+    <div id="configuration" class="flex flex-col bg-white rounded-xl shadow-xl border border-gray-200 p-5 w-full gap-8">
+        <p class="text-xl font-bold text-black">Configuration</p>
+
+        <!-- Configuration Sliders -->
+        <div id="sliders-container" class="flex gap-10">
+            <div id="slider-template" class="hidden flex-col flex-1 gap-3">
+                <div class="flex justify-between items-center">
+                    <p class="slider-label text-base text-black">label</p>
+                    <p class="slider-value text-xl font-bold">value</p>
+                </div>
+                <input type="range">
+                <div class="flex justify-between items-center">
+                    <p class="slider-min text-xs text-gray-600">min</p>
+                    <p class="slider-max text-xs text-gray-600">max</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Buttons -->
+        <div id="buttons-container" class="flex gap-2">
+            <div id="button-template"
+                class="hidden flex-1 px-5 py-2 gap-2 rounded-xl items-center justify-center hover:cursor-pointer hover:opacity-90 active:scale-95">
+                <i></i>
+                <p class="button-label font-bold text-base text-white">label</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation -->
+    <div id="simulation" class="flex flex-col bg-white p-5 border border-gray-200 rounded-xl shadow-xl">
+    </div>
 </body>
 
 </html>
