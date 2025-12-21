@@ -3,19 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="main.js" type="module"></script>
+    <script src="src/coreUtils.js" type="module"></script>
+    <script src="src/simulationUtils.js" type="module"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.5/svg.min.js"
         integrity="sha512-CkUwcqrYQeVgMsjmgk8LfpTvqJRd10i2WBo1/60jZ8RN2aH/f6KFV4lKRYWnQjeWn3o8Fjp5ixVNeP16G5VAgw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="main.js" type="module"></script>
-    <script src="src/utils.js" type="module"></script>
 
     <title>Missionaries and Cannibals</title>
 </head>
 
-<body class="flex flex-col gap-5 mx-auto w-1/2">
+<body class="flex flex-col gap-5 mx-auto w-2/3">
     <!-- Header -->
     <p class="text-2xl font-semibold text-black">Missionaries and Cannibals Visualizer</p>
 
@@ -49,8 +51,9 @@
     </div>
 
     <!-- Simulation -->
-    <div id="simulation" class="flex flex-col bg-white p-5 border border-gray-200 rounded-xl shadow-xl">
-    </div>
+    <div id="simulation" class="w-full bg-white rounded-xl shadow-xl p-10 border border-gray-200">
+        <div id="canvas" class="bg-gray-200 rounded"></canvas>
+        </div>
 </body>
 
 </html>

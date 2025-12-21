@@ -1,18 +1,22 @@
+import { createBackgroundElements, createBoat, createPeople } from "./src/simulationUtils.js"
+
 const configuration = {
     defaultNumPeople: 3,
     minNumPeople: 1,
-    maxNumPeople: 10,
+    maxNumPeople: 9,
     stepNumPeople: 1,
 
     defaultBoatCapacity: 2,
     minBoatCapacity: 2,
-    maxBoatCapacity: 4,
+    maxBoatCapacity: 5,
     stepBoatCapacity: 1,
 
     defaultAnimationSpeed: 1,
     minAnimationSpeed: 0.5,
     maxAnimationSpeed: 5.0,
     stepAnimationSpeed: 0.25,
+
+    baseAnimationDuration: 1000,
 }
 
 let state = {
@@ -21,10 +25,33 @@ let state = {
     animationSpeed: configuration.defaultAnimationSpeed
 }
 
+const updateState = (oldState, update) => {
+    state = {
+        ...oldState,
+        ...update
+    }
+}
+
+const onChangeNumPeople = (e) => {
+    updateState(state, {
+        n: e.target.value,
+    })
+
+    initCanvas();
+}
+
+const onChangeBoatCapacity = (e) => {
+    initCanvas();
+}
+
+const onChangeAnimationSpeed = (e) => {
+
+}
+
 const slidersConfig = [
-    { label: "Cannibals and Missionaries", min: configuration.minNumPeople, max: configuration.maxNumPeople, initialValue: configuration.defaultNumPeople, step: configuration.stepNumPeople },
-    { label: "Boat Capacity", min: configuration.minBoatCapacity, max: configuration.maxBoatCapacity, initialValue: configuration.defaultBoatCapacity, step: configuration.stepBoatCapacity },
-    { label: "Animation Speed", min: configuration.minAnimationSpeed, max: configuration.maxAnimationSpeed, initialValue: configuration.defaultAnimationSpeed, step: configuration.stepAnimationSpeed }
+    { label: "Cannibals and Missionaries", min: configuration.minNumPeople, max: configuration.maxNumPeople, initialValue: configuration.defaultNumPeople, step: configuration.stepNumPeople, action: onChangeNumPeople },
+    { label: "Boat Capacity", min: configuration.minBoatCapacity, max: configuration.maxBoatCapacity, initialValue: configuration.defaultBoatCapacity, step: configuration.stepBoatCapacity, action: onChangeBoatCapacity },
+    { label: "Animation Speed", min: configuration.minAnimationSpeed, max: configuration.maxAnimationSpeed, initialValue: configuration.defaultAnimationSpeed, step: configuration.stepAnimationSpeed, action: onChangeAnimationSpeed }
 ]
 
 const play = () => { }
@@ -74,6 +101,7 @@ const initSliders = () => {
 
         slider.addEventListener("input", (e) => {
             sliderValue.textContent = e.target.value;
+            config.action(e);
         });
 
         slidersContainer.append(slider);
@@ -105,6 +133,14 @@ const initButtons = () => {
     });
 }
 
+const initCanvas = () => {
+    const backgroundElements = createBackgroundElements();
+    const boat = createBoat();
+    const people = createPeople(state.n);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initConfiguration();
-})
+
+    initCanvas();
+});

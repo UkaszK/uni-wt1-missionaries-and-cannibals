@@ -18,14 +18,17 @@ export const getAllTransportCombinations = (cMax, mMax, boatCapacity) => {
 
     for (var c = 0; c <= cMax; c++) {
         for (var m = 0; m <= mMax; m++) {
+            // Skips if the boat would be empty
             if (c === 0 && m === 0) {
                 continue;
             }
 
-            if (c > m && m > 0) {
+            // Skips if boat has missionaries on it but has more cannibals than missionaries
+            if (m > 0 && c > m) {
                 continue;
             }
 
+            // Skips if cannibals and missionaries are more than the boat can take
             if (c + m > boatCapacity) {
                 continue;
             }

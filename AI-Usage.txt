@@ -1,0 +1,236 @@
+AI was used to modify parts of this project.
+
+File affected: simulationUtils.js
+AI Tool: Gemini 2.0 Flash
+Date: 21.12.2025
+
+Context:
+The initial logic for drawing SVG elements (shores, boat, and people) was functional but contained redundant code and hardcoded positioning. AI was used to refactor the code for better maintainability.
+
+FULL CHAT LOG:
+
+Prompt:
+Mache den Code effizienter und Anpassungsfähiger.
+
+const configuration = {
+    // Canvas
+    canvasWidth: "100%",
+    canvasHeight: 400,
+
+    // Height of Water, Shore and Boat
+    height: "100%",
+
+    // Water
+    waterWidthPercent: 50,
+    waterStartColor: "#6997ce",
+    waterEndColor: "#5c84b1",
+
+    // Shores
+    shoreStartColor: "#78a251",
+    shoreEndColor: "#587a45",
+
+    // Boat
+    boatWidthPercent: 10,
+    boatHeightPercent: 15,
+    boatColor: "#8a481e",
+    boatDistanceFromShorePercent: 3,
+    boatCornerRadius: 25,
+
+    // People
+    peoplePerLine: 3,
+    verticalPeopleDistanceFromEdgesPercent: 28,
+}
+
+const draw = SVG().addTo("#canvas").size(configuration.canvasWidth, configuration.canvasHeight);
+
+const convertNumToPercent = (num) => {
+    return `${num}%`
+}
+
+const getVerticalGradientFromColors = (start, end) => {
+    return draw.gradient("linear", (add) => {
+        add.stop(0, start);
+        add.stop(1, end);
+    }).from(0, 0).to(0, 1);
+}
+
+const getWaterColorGradient = () => {
+    const { waterStartColor, waterEndColor } = configuration;
+    return getVerticalGradientFromColors(waterStartColor, waterEndColor);
+}
+
+const getWaterWidth = () => {
+    return configuration.waterWidthPercent;
+}
+
+const getShoreColorGradient = () => {
+    const { shoreStartColor, shoreEndColor } = configuration;
+    return getVerticalGradientFromColors(shoreStartColor, shoreEndColor);
+}
+
+const getShoreWidth = () => {
+    const { waterWidthPercent } = configuration;
+    return (100 - waterWidthPercent) / 2;
+}
+
+const getOffsetPercentShorePosX = () => {
+    const { waterWidthPercent } = configuration;
+    return 50 + waterWidthPercent / 2
+}
+
+export const createBackgroundElements = () => {
+    const { height } = configuration;
+    const waterWidth = convertNumToPercent(getWaterWidth());
+    const shoreWidth = convertNumToPercent(getShoreWidth());
+
+    const waterGradient = getWaterColorGradient(draw);
+    draw.rect(waterWidth, height).x(shoreWidth).fill(waterGradient);
+
+    const shoreGradient = getShoreColorGradient(draw);
+    for (var i = 0; i < 2; i++) {
+        const numPosX = i * getOffsetPercentShorePosX();
+        const percentPosX = convertNumToPercent(numPosX);
+        draw.rect(shoreWidth, height).x(percentPosX).fill(shoreGradient);
+    }
+}
+
+const getBoatPosX = (boatLeft) => {
+    const { waterWidthPercent, boatDistanceFromShorePercent } = configuration;
+    if (boatLeft) {
+        return convertNumToPercent((100 - waterWidthPercent) / 2 + boatDistanceFromShorePercent)
+    }
+}
+
+export const createBoat = () => {
+    const { boatWidthPercent, boatHeightPercent, boatColor, boatCornerRadius } = configuration;
+    const boatWidth = convertNumToPercent(boatWidthPercent);
+    const boatHeight = convertNumToPercent(boatHeightPercent);
+    const boatPosY = convertNumToPercent(50 - boatHeightPercent / 2);
+    const boatPosX = getBoatPosX(true);
+    return draw.rect(boatWidth, boatHeight).x(boatPosX).y(boatPosY).fill(boatColor).radius(boatCornerRadius);
+}
+
+const getPersonCircleRadius = () => {
+    const { peoplePerLine } = configuration;
+    const shoreWidth = getShoreWidth();
+    return shoreWidth / (peoplePerLine + 1) / 2;
+}
+
+const getPersonCirclePosX = (idx) => {
+    const { peoplePerLine } = configuration;
+    const shoreWidth = getShoreWidth();
+    const slotWidth = shoreWidth / (peoplePerLine + 1);
+    const column = idx % peoplePerLine;
+    return convertNumToPercent(slotWidth + (column * slotWidth));
+}
+
+const getPersonCirclePosY = (idx, baseOffset) => {
+    const { peoplePerLine } = configuration;
+    const row = Math.floor(idx / peoplePerLine);
+    const rowSpacing = 8;
+    return convertNumToPercent(baseOffset + (row * rowSpacing));
+}
+
+export const createPeople = (n) => {
+    const { verticalPeopleDistanceFromEdgesPercent: yOffset } = configuration;
+    const radius = convertNumToPercent(getPersonCircleRadius());
+    let result = [];
+
+    for (var i = 0; i < n; i++) {
+        const posX = getPersonCirclePosX(i);
+
+        const c = draw.circle(radius).fill("#f00");
+        c.cx(posX).cy(getPersonCirclePosY(i, yOffset));
+        result.push(c);
+
+        const m = draw.circle(radius).fill("#00f");
+        m.cx(posX).cy(getPersonCirclePosY(i, 100 - yOffset));
+        result.push(m);
+    }
+
+    return result;
+}
+
+Gemini Response:
+Hier ist die optimierte Version. Ich habe redundante Funktionsaufrufe reduziert, die Berechnungslogik in eine universelle Hilfsfunktion ausgelagert und die Erzeugung der Kreise effizienter gestaltet.
+const configuration = {
+    canvasWidth: "100%",
+    canvasHeight: 400,
+    height: "100%",
+    waterWidthPercent: 50,
+    waterStartColor: "#6997ce",
+    waterEndColor: "#5c84b1",
+    shoreStartColor: "#78a251",
+    shoreEndColor: "#587a45",
+    boatWidthPercent: 10,
+    boatHeightPercent: 15,
+    boatColor: "#8a481e",
+    boatDistanceFromShorePercent: 3,
+    boatCornerRadius: 25,
+    peoplePerLine: 3,
+    verticalPeopleDistanceFromEdgesPercent: 28,
+}
+
+const draw = SVG().addTo("#canvas").size(configuration.canvasWidth, configuration.canvasHeight);
+
+const toPct = (num) => `${num}%`;
+
+const getGradient = (start, end) => 
+    draw.gradient("linear", (add) => {
+        add.stop(0, start);
+        add.stop(1, end);
+    }).from(0, 0).to(0, 1);
+
+const getShoreWidth = () => (100 - configuration.waterWidthPercent) / 2;
+
+export const createBackgroundElements = () => {
+    const { height, waterWidthPercent } = configuration;
+    const shoreWidth = getShoreWidth();
+
+    draw.rect(toPct(waterWidthPercent), height)
+        .x(toPct(shoreWidth))
+        .fill(getGradient(configuration.waterStartColor, configuration.waterEndColor));
+
+    const shoreGradient = getGradient(configuration.shoreStartColor, configuration.shoreEndColor);
+    [0, 50 + waterWidthPercent / 2].forEach(posX => {
+        draw.rect(toPct(shoreWidth), height).x(toPct(posX)).fill(shoreGradient);
+    });
+}
+
+export const createBoat = () => {
+    const { boatWidthPercent, boatHeightPercent, boatColor, boatCornerRadius, boatDistanceFromShorePercent } = configuration;
+    const boatPosX = getShoreWidth() + boatDistanceFromShorePercent;
+    
+    return draw.rect(toPct(boatWidthPercent), toPct(boatHeightPercent))
+        .x(toPct(boatPosX))
+        .y(toPct(50 - boatHeightPercent / 2))
+        .fill(boatColor)
+        .radius(boatCornerRadius);
+}
+
+const getPersonCoords = (idx, baseOffset, isBottom = false) => {
+    const { peoplePerLine } = configuration;
+    const shoreWidth = getShoreWidth();
+    const slot = shoreWidth / (peoplePerLine + 1);
+    
+    const x = slot + (idx % peoplePerLine) * slot;
+    const row = Math.floor(idx / peoplePerLine);
+    const y = isBottom ? baseOffset - (row * 8) : baseOffset + (row * 8);
+    
+    return { x: toPct(x), y: toPct(y) };
+}
+
+export const createPeople = (n) => {
+    const { verticalPeopleDistanceFromEdgesPercent: yOffset, peoplePerLine } = configuration;
+    const radius = toPct(getShoreWidth() / (peoplePerLine + 1) / 2);
+    const result = [];
+
+    for (let i = 0; i < n; i++) {
+        const topPos = getPersonCoords(i, yOffset);
+        result.push(draw.circle(radius).fill("#f00").cx(topPos.x).cy(topPos.y));
+
+        const botPos = getPersonCoords(i, 100 - yOffset, true);
+        result.push(draw.circle(radius).fill("#00f").cx(botPos.x).cy(botPos.y));
+    }
+    return result;
+}

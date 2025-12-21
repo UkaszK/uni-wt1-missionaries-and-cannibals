@@ -1,4 +1,4 @@
-import { bfs, createNode, getAllTransportCombinations, getChildren, movePeople, stringifyNode } from "../utils"
+import { bfs, createNode, getAllTransportCombinations, getChildren, movePeople, stringifyNode } from "../coreUtils"
 
 test("createCannibalsAndMissionariesArray to correctly create objects", () => {
     expect(createNode(2, 2, 1, 1, true)).toEqual([{ c: 2, m: 2 }, { c: 1, m: 1 }, true]);
