@@ -1,4 +1,4 @@
-import { getPathIterator } from "./src/coreUtils.js"
+import { bfs, getPathIterator } from "./src/coreUtils.js"
 import { clearDraw, createBackgroundElements, createBoat, createPeople, getBoatCenterCoords, getBoatPositionX, getPersonCoords, toPercent } from "./src/simulationUtils.js"
 
 const configuration = {
@@ -30,6 +30,7 @@ let state = {
     people: createPeople(configuration.defaultNumPeople),
     boat: createBoat(),
     intervalID: undefined,
+    setupValid: true,
 }
 
 const updateState = (oldState, update) => {
@@ -42,6 +43,7 @@ const updateState = (oldState, update) => {
 const onChangeNumPeople = (value) => {
     updateState(state, {
         n: value,
+        setupValid: !!bfs(value, state.boatCapacity)
     });
 
     reset();
@@ -50,6 +52,7 @@ const onChangeNumPeople = (value) => {
 const onChangeBoatCapacity = (value) => {
     updateState(state, {
         boatCapacity: value,
+        setupValid: !!bfs(state.n, value)
     });
 
     reset();
@@ -91,6 +94,13 @@ const pause = () => {
 }
 
 const step = () => {
+    if (!state.setupValid) {
+        alert("This setup does not find a valid solution and cannot be animated.")
+        if (state.intervalID) {
+            pause();
+        }
+    }
+
     const partialAnimationDuration = state.animationDuration / 3;
     const [lhs, rhs] = state.people;
 
