@@ -54,23 +54,31 @@ export const getChildren = (leftSide, rightSide, boatCapacity, boatLeft) => {
 }
 
 export const stringifyNode = (node) => {
-    const lhs = node[0], rhs = node[1], boatLeft = node[2];
+    const [lhs, rhs, boatLeft] = node;
     return `${lhs.c},${lhs.m},${rhs.c},${rhs.m},${boatLeft}`
 }
 
 export const tracePath = (parentsMap, node) => {
     const result = [];
     let current = node;
+    let parent = parentsMap.get(stringifyNode(current));
 
-    while (current) {
+    while (parent) {
         result.push(current);
         current = parentsMap.get(stringifyNode(current));
+        parent = parentsMap.get(stringifyNode(current));
     }
 
     return result.reverse();
 }
 
-export function* getPathIterator(path) {
+export function* getPathIterator(n, boatCapacity) {
+    const path = bfs(n, boatCapacity);
+
+    if (!path) {
+        return undefined;
+    }
+
     for (const node of path) {
         yield node;
     }

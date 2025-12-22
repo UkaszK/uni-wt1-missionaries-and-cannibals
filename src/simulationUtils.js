@@ -24,7 +24,9 @@ const configuration = {
 
 const draw = SVG().addTo("#canvas").size(configuration.canvasWidth, configuration.canvasHeight);
 
-const toPercent = (num) => `${num}%`;
+export const clearDraw = () => draw.clear();
+
+export const toPercent = (num) => `${num}%`;
 
 const getGradient = (start, end) => {
     return draw.gradient("linear", (add) => {
@@ -49,9 +51,18 @@ export const createBackgroundElements = () => {
     });
 }
 
+export const getBoatPositionX = (boatLeft) => {
+    const shoreWidth = getShoreWidth();
+
+    const boatLeftPosX = shoreWidth + configuration.boatDistanceFromShorePercent;
+    const boatRightPosX = shoreWidth + configuration.waterWidthPercent - configuration.boatDistanceFromShorePercent - configuration.boatWidthPercent;
+
+    return boatLeft ? boatLeftPosX : boatRightPosX;
+}
+
 export const createBoat = () => {
-    const { boatWidthPercent, boatHeightPercent, boatColor, boatCornerRadius, boatDistanceFromShorePercent } = configuration;
-    const boatPosX = getShoreWidth() + boatDistanceFromShorePercent;
+    const { boatWidthPercent, boatHeightPercent, boatColor, boatCornerRadius } = configuration;
+    const boatPosX = getBoatPositionX(true);
 
     return draw.rect(toPercent(boatWidthPercent), toPercent(boatHeightPercent))
         .x(toPercent(boatPosX))
@@ -60,29 +71,41 @@ export const createBoat = () => {
         .radius(boatCornerRadius);
 }
 
-const getPersonCoords = (idx, baseOffset, isBottom = false) => {
+export const getPersonCoords = (idx, isBottom = false, isRight = false) => {
+    const { verticalPeopleDistanceFromEdgesPercent: yOffset } = configuration;
+    const updatedOffset = isBottom ? 100 - yOffset : yOffset;
+
     const { peoplePerLine } = configuration;
     const shoreWidth = getShoreWidth();
     const slot = shoreWidth / (peoplePerLine + 1);
 
-    const x = slot + (idx % peoplePerLine) * slot;
+    const shoreStart = isRight ? (100 - shoreWidth) : 0;
+
+    const x = shoreStart + slot + (idx % peoplePerLine) * slot;
     const row = Math.floor(idx / peoplePerLine);
-    const y = isBottom ? baseOffset - (row * 8) : baseOffset + (row * 8);
+    const y = isBottom ? updatedOffset - (row * 8) : updatedOffset + (row * 8);
 
     return { x: toPercent(x), y: toPercent(y) };
+}
+
+export const getBoatCenterCoords = (isLeft) => {
+    const { boatWidthPercent } = configuration;
+    const x = getBoatPositionX(isLeft) + (boatWidthPercent / 2);
+    const y = 50;
+    return { x, y };
 }
 
 export const createPeople = (n) => {
     const { verticalPeopleDistanceFromEdgesPercent: yOffset, peoplePerLine } = configuration;
     const radius = toPercent(getShoreWidth() / (peoplePerLine + 1) / 2);
-    const result = { c: [], m: [] };
+    const result = [{ c: [], m: [] }, { c: [], m: [] }];
 
     for (let i = 0; i < n; i++) {
-        const topPos = getPersonCoords(i, yOffset);
-        result.c.push(draw.circle(radius).fill("#f00").cx(topPos.x).cy(topPos.y));
+        const topPos = getPersonCoords(i);
+        result[0].c.push(draw.circle(radius).fill("#f00").cx(topPos.x).cy(topPos.y));
 
-        const botPos = getPersonCoords(i, 100 - yOffset, true);
-        result.m.push(draw.circle(radius).fill("#00f").cx(botPos.x).cy(botPos.y));
+        const botPos = getPersonCoords(i, true);
+        result[0].m.push(draw.circle(radius).fill("#00f").cx(botPos.x).cy(botPos.y));
     }
     return result;
 }

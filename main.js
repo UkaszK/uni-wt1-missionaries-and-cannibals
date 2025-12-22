@@ -1,4 +1,5 @@
-import { createBackgroundElements, createBoat, createPeople } from "./src/simulationUtils.js"
+import { getPathIterator } from "./src/coreUtils.js"
+import { clearDraw, createBackgroundElements, createBoat, createPeople, getBoatCenterCoords, getBoatPositionX, getPersonCoords, toPercent } from "./src/simulationUtils.js"
 
 const configuration = {
     defaultNumPeople: 3,
@@ -16,15 +17,19 @@ const configuration = {
     maxAnimationSpeed: 5.0,
     stepAnimationSpeed: 0.25,
 
-    baseAnimationDuration: 1000,
+    defaultAnimationDuration: 1000,
+
+    defaultPeople: [{ c: [], m: [] }, { c: [], m: [] }]
 }
 
 let state = {
     n: configuration.defaultNumPeople,
     boatCapacity: configuration.defaultBoatCapacity,
-    animationSpeed: configuration.defaultAnimationSpeed,
-    people: { c: [], m: [] },
-    boat: undefined
+    animationDuration: configuration.defaultAnimationDuration / configuration.defaultAnimationSpeed,
+    process: getPathIterator(configuration.defaultNumPeople, configuration.defaultBoatCapacity),
+    people: createPeople(configuration.defaultNumPeople),
+    boat: createBoat(),
+    intervalID: undefined,
 }
 
 const updateState = (oldState, update) => {
@@ -39,7 +44,7 @@ const onChangeNumPeople = (value) => {
         n: value,
     });
 
-    initCanvas();
+    reset();
 }
 
 const onChangeBoatCapacity = (value) => {
@@ -47,15 +52,18 @@ const onChangeBoatCapacity = (value) => {
         boatCapacity: value,
     });
 
-    initCanvas();
+    reset();
 }
 
 const onChangeAnimationSpeed = (value) => {
-    const { baseAnimationDuration } = configuration;
-
     updateState(state, {
-        animationSpeed: baseAnimationDuration / Number(value),
+        animationDuration: configuration.defaultAnimationDuration / value,
     });
+
+    if (state.intervalID) {
+        pause();
+        play();
+    }
 }
 
 const slidersConfig = [
@@ -67,7 +75,7 @@ const slidersConfig = [
 const play = () => {
     const intervalID = window.setInterval(() => {
         step();
-    }, baseAnimationDuration * state.animationSpeed);
+    }, state.animationDuration);
 
     updateState(state, {
         intervalID: intervalID
@@ -83,18 +91,88 @@ const pause = () => {
 }
 
 const step = () => {
-    
+    const partialAnimationDuration = state.animationDuration / 3;
+    const [lhs, rhs] = state.people;
+
+    const current = state.process.next();
+    if (current.done) {
+        return;
+    }
+
+    const [newLhs, newRhs, nextBoatIsLeft] = current.value;
+
+    const currentBoatIsLeft = !nextBoatIsLeft;
+    const startBoatPos = getBoatCenterCoords(currentBoatIsLeft);
+    const endBoatPos = getBoatCenterCoords(nextBoatIsLeft);
+    const endBoatRectX = toPercent(getBoatPositionX(nextBoatIsLeft));
+
+    const movingPeople = [];
+
+    if (nextBoatIsLeft) {
+        // Boat goes from right to left
+        const cToMove = newLhs.c - lhs.c.length;
+        for (var i = 0; i < cToMove; i++) {
+            movingPeople.push({ el: rhs.c.pop(), type: 'c' });
+        }
+
+        const mToMove = newLhs.m - lhs.m.length;
+        for (var i = 0; i < mToMove; i++) {
+            movingPeople.push({ el: rhs.m.pop(), type: 'm' });
+        }
+    } else {
+        // Boat goes from left to right
+        const cToMove = newRhs.c - rhs.c.length;
+        for (var i = 0; i < cToMove; i++) {
+            movingPeople.push({ el: lhs.c.pop(), type: 'c' });
+        }
+
+        const mToMove = newRhs.m - rhs.m.length;
+        for (var i = 0; i < mToMove; i++) {
+            movingPeople.push({ el: lhs.m.pop(), type: 'm' });
+        }
+    }
+
+    // Animation
+    movingPeople.forEach((person, idx) => {
+        const offset = (idx - (movingPeople.length - 1) / 2) * 2;
+        const targetSide = nextBoatIsLeft ? lhs : rhs;
+        const targetIdx = targetSide[person.type].length;
+
+        const coords = getPersonCoords(targetIdx, person.type === 'm', !nextBoatIsLeft);
+
+        // Die Animation in einer sauberen Kette (Chain)
+        person.el.animate(partialAnimationDuration) // Enter
+            .cx(toPercent(startBoatPos.x + offset))
+            .cy(toPercent(startBoatPos.y))
+            .animate(partialAnimationDuration) // Travel
+            .cx(toPercent(endBoatPos.x + offset))
+            .animate(partialAnimationDuration) // Arrive
+            .cx(coords.x)
+            .cy(coords.y);
+
+        targetSide[person.type].push(person.el);
+    });
+
+    state.boat.animate(partialAnimationDuration, partialAnimationDuration, "now").x(endBoatRectX);
 }
 
 const reset = () => {
     pause();
+
+    updateState(state, {
+        process: getPathIterator(state.n, state.boatCapacity),
+        people: configuration.defaultPeople,
+        boat: createBoat(),
+    });
+
+    initCanvas();
 }
 
 const buttonsConfig = [
     { label: "Play", bgColor: "bg-purple-700", icon: "fa-solid fa-play text-white", action: play },
     { label: "Pause", bgColor: "bg-orange-500", icon: "fa-solid fa-pause text-white", action: pause, },
-    { label: "Step", bgColor: "bg-gray-500", icon: "fa-solid fa-rotate text-white", action: step },
-    { label: "Reset", bgColor: "bg-gray-800", icon: "fa-solid fa-forward-step text-white", action: reset }
+    { label: "Step", bgColor: "bg-gray-500", icon: "fa-solid fa-forward-step text-white", action: step },
+    { label: "Reset", bgColor: "bg-gray-800", icon: "fa-solid fa-rotate text-white", action: reset }
 ]
 
 const initConfiguration = () => {
@@ -132,7 +210,7 @@ const initSliders = () => {
 
         slider.addEventListener("input", (e) => {
             sliderValue.textContent = e.target.value;
-            config.action(e.target.value);
+            config.action(Number(e.target.value));
         });
 
         slidersContainer.append(slider);
@@ -165,6 +243,7 @@ const initButtons = () => {
 }
 
 const initCanvas = () => {
+    clearDraw();
     const backgroundElements = createBackgroundElements();
     const boat = createBoat();
     const people = createPeople(state.n);
