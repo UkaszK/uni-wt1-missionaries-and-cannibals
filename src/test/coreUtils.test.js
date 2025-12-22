@@ -1,4 +1,4 @@
-import { bfs, createNode, getAllTransportCombinations, getChildren, movePeople, stringifyNode } from "../coreUtils"
+import { bfs, createNode, getAllTransportCombinations, getChildren, movePeople, stringifyNode, tracePath } from "../coreUtils"
 
 test("createCannibalsAndMissionariesArray to correctly create objects", () => {
     expect(createNode(2, 2, 1, 1, true)).toEqual([{ c: 2, m: 2 }, { c: 1, m: 1 }, true]);
@@ -64,9 +64,9 @@ test("stringifyNode to correctly convert nodes into strings", () => {
 })
 
 test("bfs to correctly determine winning formation", () => {
-    expect(bfs(3, 2)).toBe(true);
-    expect(bfs(4, 2)).toBe(false);
-    expect(bfs(5, 3)).toBe(true);
-    expect(bfs(10, 4)).toBe(true);
-    expect(bfs(50, 4)).toBe(true);
+    expect(bfs(3, 2)).not.toBe(undefined);
+    expect(bfs(4, 2)).toBe(undefined);
+    expect(bfs(5, 3)).not.toBe(undefined);
+    expect(bfs(10, 4)).not.toBe(undefined);
+    expect(bfs(50, 4)).not.toBe(undefined);
 })

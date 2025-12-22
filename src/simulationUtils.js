@@ -75,14 +75,14 @@ const getPersonCoords = (idx, baseOffset, isBottom = false) => {
 export const createPeople = (n) => {
     const { verticalPeopleDistanceFromEdgesPercent: yOffset, peoplePerLine } = configuration;
     const radius = toPercent(getShoreWidth() / (peoplePerLine + 1) / 2);
-    const result = [];
+    const result = { c: [], m: [] };
 
     for (let i = 0; i < n; i++) {
         const topPos = getPersonCoords(i, yOffset);
-        result.push(draw.circle(radius).fill("#f00").cx(topPos.x).cy(topPos.y));
+        result.c.push(draw.circle(radius).fill("#f00").cx(topPos.x).cy(topPos.y));
 
         const botPos = getPersonCoords(i, 100 - yOffset, true);
-        result.push(draw.circle(radius).fill("#00f").cx(botPos.x).cy(botPos.y));
+        result.m.push(draw.circle(radius).fill("#00f").cx(botPos.x).cy(botPos.y));
     }
     return result;
 }

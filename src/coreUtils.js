@@ -58,19 +58,40 @@ export const stringifyNode = (node) => {
     return `${lhs.c},${lhs.m},${rhs.c},${rhs.m},${boatLeft}`
 }
 
-const win = () => {
-    console.log("Win!");
+export const tracePath = (parentsMap, node) => {
+    const result = [];
+    let current = node;
+
+    while (current) {
+        result.push(current);
+        current = parentsMap.get(stringifyNode(current));
+    }
+
+    return result.reverse();
 }
 
-const lose = () => {
-    console.log("No solution found!");
+export function* getPathIterator(path) {
+    for (const node of path) {
+        yield node;
+    }
+}
+
+const win = (parentsMap, node) => {
+    return tracePath(parentsMap, node);
 }
 
 // Breadth-first search for finding the winning formation
 export const bfs = (n, boatCapacity) => {
     const start = createNode(n, n, 0, 0, true);
     const queue = [start];
+
+    const startString = stringifyNode(start)
+
     const visited = new Set();
+    visited.add(startString);
+
+    const parentsMap = new Map();
+    parentsMap.set(startString, null);
 
     while (queue.length > 0) {
         const [lhs, rhs, boatLeft] = queue.shift();
@@ -81,20 +102,19 @@ export const bfs = (n, boatCapacity) => {
         }
 
         if (lhs.c === 0 && lhs.m === 0) {
-            win();
-            return true;
+            return win(parentsMap, [lhs, rhs, boatLeft]);
         }
-
-        visited.add(stringifyNode([lhs, rhs, boatLeft]));
 
         const children = getChildren(lhs, rhs, boatCapacity, boatLeft);
         children.forEach((child) => {
-            if (!visited.has(stringifyNode(child))) {
+            const childString = stringifyNode(child);
+            if (!visited.has(childString)) {
+                visited.add(childString);
+                parentsMap.set(childString, [lhs, rhs, boatLeft]);
                 queue.push(child);
             }
         })
     }
 
-    lose();
-    return false;
+    return undefined;
 }

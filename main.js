@@ -22,7 +22,9 @@ const configuration = {
 let state = {
     n: configuration.defaultNumPeople,
     boatCapacity: configuration.defaultBoatCapacity,
-    animationSpeed: configuration.defaultAnimationSpeed
+    animationSpeed: configuration.defaultAnimationSpeed,
+    people: { c: [], m: [] },
+    boat: undefined
 }
 
 const updateState = (oldState, update) => {
@@ -32,20 +34,28 @@ const updateState = (oldState, update) => {
     }
 }
 
-const onChangeNumPeople = (e) => {
+const onChangeNumPeople = (value) => {
     updateState(state, {
-        n: e.target.value,
-    })
+        n: value,
+    });
 
     initCanvas();
 }
 
-const onChangeBoatCapacity = (e) => {
+const onChangeBoatCapacity = (value) => {
+    updateState(state, {
+        boatCapacity: value,
+    });
+
     initCanvas();
 }
 
-const onChangeAnimationSpeed = (e) => {
+const onChangeAnimationSpeed = (value) => {
+    const { baseAnimationDuration } = configuration;
 
+    updateState(state, {
+        animationSpeed: baseAnimationDuration / Number(value),
+    });
 }
 
 const slidersConfig = [
@@ -54,10 +64,31 @@ const slidersConfig = [
     { label: "Animation Speed", min: configuration.minAnimationSpeed, max: configuration.maxAnimationSpeed, initialValue: configuration.defaultAnimationSpeed, step: configuration.stepAnimationSpeed, action: onChangeAnimationSpeed }
 ]
 
-const play = () => { }
-const pause = () => { }
-const step = () => { }
-const reset = () => { }
+const play = () => {
+    const intervalID = window.setInterval(() => {
+        step();
+    }, baseAnimationDuration * state.animationSpeed);
+
+    updateState(state, {
+        intervalID: intervalID
+    });
+}
+
+const pause = () => {
+    window.clearInterval(state.intervalID);
+
+    updateState(state, {
+        intervalID: undefined
+    });
+}
+
+const step = () => {
+    
+}
+
+const reset = () => {
+    pause();
+}
 
 const buttonsConfig = [
     { label: "Play", bgColor: "bg-purple-700", icon: "fa-solid fa-play text-white", action: play },
@@ -101,7 +132,7 @@ const initSliders = () => {
 
         slider.addEventListener("input", (e) => {
             sliderValue.textContent = e.target.value;
-            config.action(e);
+            config.action(e.target.value);
         });
 
         slidersContainer.append(slider);
@@ -137,6 +168,11 @@ const initCanvas = () => {
     const backgroundElements = createBackgroundElements();
     const boat = createBoat();
     const people = createPeople(state.n);
+
+    updateState(state, {
+        people: people,
+        boat: boat,
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
