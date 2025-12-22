@@ -1,11 +1,10 @@
 AI was used to modify parts of this project.
 
-File affected: simulationUtils.js
+File: simulationUtils.js
 AI Tool: Gemini 2.0 Flash
-Date: 21.12.2025
 
 Context:
-The initial logic for drawing SVG elements (shores, boat, and people) was functional but contained redundant code and hardcoded positioning. AI was used to refactor the code for better maintainability.
+The initial logic for drawing SVG elements (shores, boat, and people) was working but contained redundant code and more or less hardcoded positioning. AI was used to refactor the code for better maintainability.
 
 FULL CHAT LOG:
 

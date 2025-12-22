@@ -26,11 +26,12 @@ const draw = SVG().addTo("#canvas").size(configuration.canvasWidth, configuratio
 
 const toPercent = (num) => `${num}%`;
 
-const getGradient = (start, end) =>
-    draw.gradient("linear", (add) => {
+const getGradient = (start, end) => {
+    return draw.gradient("linear", (add) => {
         add.stop(0, start);
         add.stop(1, end);
     }).from(0, 0).to(0, 1);
+}
 
 const getShoreWidth = () => (100 - configuration.waterWidthPercent) / 2;
 
