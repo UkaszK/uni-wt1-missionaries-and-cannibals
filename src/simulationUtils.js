@@ -96,7 +96,7 @@ export const getBoatCenterCoords = (isLeft) => {
 }
 
 export const createPeople = (n) => {
-    const { verticalPeopleDistanceFromEdgesPercent: yOffset, peoplePerLine } = configuration;
+    const { peoplePerLine } = configuration;
     const radius = toPercent(getShoreWidth() / (peoplePerLine + 1) / 2);
     const result = [{ c: [], m: [] }, { c: [], m: [] }];
 

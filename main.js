@@ -150,7 +150,6 @@ const step = () => {
 
         const coords = getPersonCoords(targetIdx, person.type === 'm', !nextBoatIsLeft);
 
-        // Die Animation in einer sauberen Kette (Chain)
         person.el.animate(partialAnimationDuration) // Enter
             .cx(toPercent(startBoatPos.x + offset))
             .cy(toPercent(startBoatPos.y))
