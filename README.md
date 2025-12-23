@@ -1,4 +1,4 @@
-# Cannibals and Missionaries – University Project
+# Missionaries and Cannibals – University Project
 
 ## General Information
 
